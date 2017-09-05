@@ -22,9 +22,10 @@ use app\models\Task;
         'enableClientValidation' => true,
         'options' => [
             'validateOnSubmit' => true,
-            'class' => 'form'
+            'class' => 'form',
+            'onsubmit' => 'return setPdf(this)'
             ],
-        'action' => 'site/create',
+        'action' => '/site/create',
         'method' => 'post',
     ]); ?>
     <?
@@ -53,12 +54,12 @@ use app\models\Task;
         if($(a).val()=='default'){
             var b = "<?
                $tasks = Task::find()->all();
-            $items = \yii\helpers\ArrayHelper::map($tasks,'name','name');
+            $items = \yii\helpers\ArrayHelper::map($tasks,'id','name');
             $str = "<label for='typeName'>Шаблоны</label>";
-            $str.= "<select name='typeName' class='form-control' onchange='changeTemplate(this)'>";
+            $str.= "<select name='typeName' class='form-control' id='template' onchange='changeTemplate(this)'>";
             $str.="<option value='' selected disabled>Выберите шаблон</option>";
-            foreach($items as $val){
-                $str.="<option value='$val'>$val</option>";
+            foreach($items as $key=>$val){
+                $str.="<option value='$key'>$val</option>";
             }
             $str.='</select>';
             echo $str;
@@ -72,13 +73,31 @@ use app\models\Task;
     function changeTemplate(a){
         switch ($(a).val()){
             <? foreach($tasks as $val){ ?>
-                case '<?=$val->name?>':c = ''+<?=($val->code)?"'$val->code'":'""'?>; $('#code').empty(); $('#code').append(c);
+                case '<?=$val->id?>':c = ''+<?=($val->code)?"'$val->code'":'""'?>; $('#code').empty(); $('#code').append(c);
                 break;
             <? }
             ?>
         }
     }
     function pageConvert(){
+        var text = $('#code').html();
+        var i=0;
+        $('#formPrint').remove();
+        regex = new RegExp('<input \([^>]*?\)id="'+ 1 + '"([^>]*?)>','g');
+        b=text.match(regex);
+        i=1;
+        while ((res = text.match(new RegExp('<input \([^>]*?\)id="'+ i + '"([^>]*?)>','g')))) {
+            text = text.replace(new RegExp('<input \([^>]*?\)id="'+ i + '"([^>]*?)>','g'),' '+$('input#'+i).val()+' ');
+            i++;
+        }
+        form  = $('#code').parent('form');
+        template = $('#template').val();
+        form.after("<form id='formPrint' action='/site/print?id="+template+"' method='post' target='_blank'><input type='hidden' name='_csrf' value='<?=Yii::$app->request->getCsrfToken()?>' /><input type='hidden' name='code' value='"+text+"'></form>");
+        $("#formPrint").submit();
+        //alert(a);
+    }
+    function setPdf(e){
+        form = $(e);
         var text = $('#code').html();
         var i=0;
         regex = new RegExp('<input \([^>]*?\)id="'+ 1 + '"([^>]*?)>','g')
@@ -88,10 +107,7 @@ use app\models\Task;
             text = text.replace(new RegExp('<input \([^>]*?\)id="'+ i + '"([^>]*?)>','g'),' '+$('input#'+i).val()+' ');
             i++;
         }
-        form  = $('#code').parent('form');
-        form.after("<form action='site/print' method='post' target='_blank'><input type='hidden' name='_csrf' value='<?=Yii::$app->request->getCsrfToken()?>' /><input type='text' name='code' value='"+text+"'></form>");
-        $("form[action='site/print']").submit();
-        //alert(a);
-
+        form.append("<input type='hidden' name='code' value='"+text+"'>");
+        return true;
     }
 </script>

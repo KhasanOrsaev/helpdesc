@@ -71,7 +71,7 @@ $this->title = 'HELPDESK';
                             [
                                 'attribute' => 'status',
                                 'format' => 'text',
-                                'filter' => false,
+                                'filter' => ['D'=>'Зарегистрирован','L'=>'В работе', 'T'=>'Выполнен','C'=>'Отменен'],
                                 'contentOptions' => ['style'=>"color: green"],
                                 'value' => function($data){
                                     switch($data['status']){

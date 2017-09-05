@@ -59,14 +59,17 @@ class AdminController extends \yii\web\Controller
     }
     public function actionTasks()
     {
-        $tasks = Task::find()->all();
+        $tasks = Task::find()->orderBy(['name'=>SORT_ASC])->all();
         $model = new Task();
+        $model->orientation = 'P';
         return $this->render('tasks',['model'=>$model, 'tasks'=>$tasks]);
     }
     public function actionCreate(){
         $model = new Task();
         if($model->load(Yii::$app->request->post())){
             $model->code = preg_replace( "/\r|\n/", "", $model->code );
+            $model->header = preg_replace( "/\r|\n/", "", $model->header );
+            $model->footer = preg_replace( "/\r|\n/", "", $model->footer );
             if(!$model->save()){
                 exit;
             }

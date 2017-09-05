@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Log;
 use app\models\Subject;
 use app\models\SubjectSearch;
+use app\models\Task;
 use app\models\User;
 use mPDF;
 use yii\web\NotFoundHttpException;
@@ -13,6 +14,10 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
+use Swift_Attachment;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
 
 class SiteController extends Controller
 {
@@ -28,7 +33,7 @@ class SiteController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
-                        'actions' => ['print','logout','index','create','update',]
+                        'actions' => ['print','logout','index','create','update']
                     ],
                     [
                         'allow' => true,
@@ -37,6 +42,7 @@ class SiteController extends Controller
                     ],
                     [
                         'allow' => true,
+                        'roles' => ['@'],
                         'actions' => ['view', 'done', 'take'],
                         'matchCallback' => function($role, $action){
                             return Yii::$app->user->identity->is_it?true:false;
@@ -44,6 +50,7 @@ class SiteController extends Controller
                     ],
                     [
                         'allow' => true,
+                        'roles' => ['@'],
                         'actions' => ['delete'],
                         'matchCallback' => function($role, $action){
                             if(Yii::$app->user->identity->is_admin==1 or Yii::$app->user->identity->is_chief==1)
@@ -109,8 +116,8 @@ class SiteController extends Controller
         /**
          * Сохраняем департамент, если прежде был пуст
          */
-        if(isset(Yii::$app->request->post()['Subject']['dept_id'])){
-            $deptid = Yii::$app->request->post()['Subject']['dept_id'];
+        if(isset(Yii::$app->request->post()['dept_id'])){
+            $deptid = Yii::$app->request->post()['dept_id'];
             $users = User::findOne(Yii::$app->user->id);
             $users->dept_id = $deptid;
             $users->update();
@@ -119,19 +126,27 @@ class SiteController extends Controller
             switch ($model->type){
                 case 'default':
 
-                    $mail = Yii::$app->mailer->compose()
+                    $mail = Swift_Message::newInstance()
                         ->setFrom(['portal@nacpp.ru'=>'HELPDESC'])
                         ->setTo('it@nacpp.ru')
-                        ->setCc('saenkok@nacpp.ru')
+                        //->setCc('saenkok@nacpp.ru')
                         ->setSubject('Новая заявка №'.$model->id)
-                        ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="192.168.0.2:84/view?id="'.$model->id.'> <b>Ссылка</b></a>');
+                        ->setContentType('text/html')
+                        ->setBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>');
                     if(isset(Yii::$app->request->post()['code'])){
                         $pdf = new mPDF();
                         $pdf->WriteHTML(Yii::$app->request->post()['code']);
-                        $mail->attach($pdf->Output());
+                        $content = $pdf->Output('','S');
+                        $attachment = Swift_Attachment::newInstance($content, 'my-file.pdf', 'application/pdf');
+                        $mail->attach($attachment);
                     }
-                        $mail->send();
+                    $transport = Swift_SmtpTransport::newInstance('192.168.0.202', 25)
+                        ->setUsername('Portal')
+                        ->setPassword('QWEasd234');
+// Create the Mailer using your created Transport
+                    $mailer = Swift_Mailer::newInstance($transport);
+// Send the created message
+                    $mailer->send($mail);
                     break;
                 case 'lims':
                     Yii::$app->mailer->compose()
@@ -140,7 +155,7 @@ class SiteController extends Controller
                         ->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                         ->setSubject('Новая заявка №'.$model->id)
                         ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="localhost:84/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
                         ->send();
                     break;
             }
@@ -248,8 +263,13 @@ class SiteController extends Controller
 
     }
 
-    public function actionPrint(){
-        $pdf = new mPDF();
+    public function actionPrint($id){
+        $model = Task::findOne($id);
+        $format = 'A4-'.$model->orientation;
+        $mgt = (isset($model->header))?45:15;
+        $pdf = new mPDF($mode = '', $format, $default_font_size = 10, $default_font = '', $mgl = 15, $mgr = 15, $mgt, $mgb = 16, $mgh = 9, $mgf = 9);
+        $pdf->setHTMLHeader($model->header);
+        $pdf->setHTMLFooter($model->footer);
         $pdf->WriteHTML(Yii::$app->request->post()['code']);
         $pdf->Output();
     }

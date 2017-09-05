@@ -80,7 +80,9 @@ class SubjectSearch extends Subject
             ->andFilterWhere(['like', 'status', $this->status])
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like','display_name',$this->getAttribute('createdBy.name')])
-            ->andFilterWhere(['like','display_name',$this->getAttribute('takenBy.name')]);
+            ->andFilterWhere(['=','org',Yii::$app->user->identity->org])
+            ->andFilterWhere(['like','display_name',$this->getAttribute('takenBy.name')])
+            ->orderBy(['id'=>SORT_DESC]);
 
         return $dataProvider;
     }
