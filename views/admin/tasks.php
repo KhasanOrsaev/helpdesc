@@ -18,10 +18,9 @@ use dosamigos\tinymce\TinyMce;
 <table class="table table-striped">
     <tr>
         <th width="10%">id</th>
-        <th width="40%">Название</th>
-        <th width="30%">Департамент</th>
-        <th width="10%"></th>
-        <th width="10%"></th>
+        <th width="60%">Название</th>
+        <th width="15%"></th>
+        <th width="15%"></th>
     </tr>
     <?
     foreach($tasks as $val){
@@ -30,7 +29,6 @@ use dosamigos\tinymce\TinyMce;
             <? $form = ActiveForm::begin(['action'=>'update']) ?>
             <td width="10%"><?=$val->id?></td>
             <td width="60%"><?=$val->name?></td>
-            <td width="60%"><?=$val->department?></td>
             <td width="15%"><?=Html::button('Изменить',[
                     'class'=>'btn btn-primary',
                     'data-toggle' => 'modal',
@@ -56,12 +54,8 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'update']); ?>
                 <?=$form->field($model,'name')->textInput()?>
-                <?=$form->field($model,'orientation')->radioList(['P'=>'Вертикальная', 'L'=>'Горизонтальная'])?>
-                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"ЦСМ",'iki'=>'ИКИ'])?>
                 <?=$form->field($model,'id')->hiddenInput()->label('')?>
-                <?=$form->field($model,'code')->textarea(['rows'=>6, 'id'=>'codeText']) ?>
-                <?=$form->field($model,'header')->textarea(['rows'=>5, 'id'=>'headerText']) ?>
-                <?=$form->field($model,'footer')->textarea(['rows'=>5, 'id'=>'footerText']) ?>
+                <?=$form->field($model,'code')->textarea(['rows'=>6]) ?>
                 <div id="code"></div>
             </div>
             <div class="modal-footer">
@@ -82,11 +76,7 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'create']); ?>
                 <?=$form->field($model,'name')->textInput()?>
-                <?=$form->field($model,'orientation')->radioList(['P'=>'Вертикальная', 'L'=>'Горизонтальная'],['id'=>'orient'])?>
-                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"ЦСМ",'iki'=>'ИКИ'], ['id'=>'dep'])?>
-                <?=$form->field($model,'code')->textarea(['rows'=>10, 'id'=>'codeText']) ?>
-                <?=$form->field($model,'header')->textarea(['rows'=>5, 'id'=>'headerText']) ?>
-                <?=$form->field($model,'footer')->textarea(['rows'=>5, 'id'=>'footerText']) ?>
+                <?=$form->field($model,'code')->textarea(['rows'=>6]) ?>
                 <div id="code"></div>
             </div>
             <div class="modal-footer">
@@ -112,29 +102,21 @@ use dosamigos\tinymce\TinyMce;
                     modal.find('form').attr('action', 'update');
                     $('#edit #task-name').val(data.name);
                     modal.find('#task-id').val(id);
-                    modal.find('#codeText').val(data.code);
-                    modal.find('#footerText').val(data.footer);
-                    modal.find('#headerText').val(data.header);
-                    modal.find('#orient').val(data.orientation);
-                    modal.find('#dep').val(data.department);
+                    modal.find('textarea').val(data.code);
                     modal.find('textarea').blur(function(){
                         modal.find('#code').empty();
                         modal.find('#code').append($(this).val());
                     });
                     modal.find('#code').empty();
-                    modal.find('#code').append(data.header+data.code+data.footer);
+                    modal.find('#code').append(data.code);
                 }
-            });
-            modal.find('textarea').blur(function(){
-                modal.find('#code').empty();
-                modal.find('#code').append(modal.find('#headerText').val()+modal.find('#codeText').val()+modal.find('#footerText').val());
             });
         });
         $('#add').on('show.bs.modal', function(event){
             var modal = $(this);
             modal.find('textarea').blur(function(){
                 modal.find('#code').empty();
-                modal.find('#code').append(modal.find('#headerText').val()+modal.find('#codeText').val()+modal.find('#footerText').val());
+                modal.find('#code').append($(this).val());
             });
         })
     });
