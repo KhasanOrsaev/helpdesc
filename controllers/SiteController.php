@@ -14,10 +14,12 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
+
 use Swift_Attachment;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SmtpTransport;
+
 
 class SiteController extends Controller
 {
@@ -125,7 +127,6 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()){
             switch ($model->type){
                 case 'default':
-
                     $mail = Swift_Message::newInstance()
                         ->setFrom(['portal@nacpp.ru'=>'HELPDESC'])
                         ->setTo('it@nacpp.ru')
