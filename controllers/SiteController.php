@@ -5,10 +5,7 @@ namespace app\controllers;
 use app\models\Log;
 use app\models\Subject;
 use app\models\SubjectSearch;
-<<<<<<< HEAD
 use app\models\Task;
-=======
->>>>>>> 59e1fa3ca5a28fddd8f3d6763c995033754131c3
 use app\models\User;
 use mPDF;
 use yii\web\NotFoundHttpException;
@@ -17,13 +14,10 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
-<<<<<<< HEAD
 use Swift_Attachment;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SmtpTransport;
-=======
->>>>>>> 59e1fa3ca5a28fddd8f3d6763c995033754131c3
 
 class SiteController extends Controller
 {
