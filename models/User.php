@@ -34,7 +34,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             [['user_name', 'display_name'], 'required'],
             [['dept_id'], 'integer'],
-            [['is_admin', 'is_chief', 'is_it', 'is_dept_chief','org','email'], 'string'],
+            [['org'], 'string'],
+            [['email'], 'email'],
+            [['is_admin', 'is_chief', 'is_it', 'is_dept_chief'],'boolean'],
             [['user_name', 'display_name'], 'string', 'max' => 100],
             [['dept_id'], 'exist', 'skipOnError' => true, 'targetClass' => Dept::className(), 'targetAttribute' => ['dept_id' => 'id']],
         ];
@@ -53,8 +55,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'email' => 'Почта',
             'dept_id' => 'Dept ID',
             'is_admin' => 'Админ',
-            'is_chief' => 'Is Chief',
-            'is_dept_chief' => 'Is Dept Chief',
+            'is_chief' => 'Начальник',
+            'is_dept_chief' => 'Начальник департамента',
         ];
     }
 

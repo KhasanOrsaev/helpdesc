@@ -1,6 +1,7 @@
 html,
 body {
     height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .wrap {
@@ -88,4 +89,88 @@ a.desc:after {
     border-left: 3px solid #eed3d7;
     padding: 10px 20px;
     margin: 0 0 15px 0;
+}
+.navbar {
+    min-height: 100px;
+    width: 100%;
+}
+.navbar-header{
+    padding-left:5%;
+}
+.navbar-collapse{
+    padding-right:5%;
+}
+.img-responsive{
+    width: 300px;
+}
+
+.table{
+    border-collapse: separate;
+    border-spacing: 5px 0px;
+}
+.table > tbody > tr:nth-of-type(even) {
+    background-color: #e0e0e0;
+}
+.table > tbody > tr:nth-of-type(odd) {
+    background-color: #ffffff;
+}
+.table > thead > tr{
+    background-color: #e0e0e0;
+}
+.table > thead > tr > td > b{
+    color: #00a6ad;
+}
+
+.table > tbody > tr > td{
+    vertical-align: middle;
+}
+.table > thead > tr > td{
+    vertical-align: middle;
+}
+
+.marsh_header{
+    border-bottom: 10px solid white;
+    border-top: 10px solid white;
+    background: #e4f3f2;
+}
+
+.lpv{
+    margin: 0px 10px 0px 10px;
+    background-color: rgba(0, 166, 173, 0.21);
+}
+.lppv{
+    padding: 15px;
+}
+
+.navbar-nav > li > a {
+    color:black;
+}
+
+.nav li > form > button.logout {
+    color:black;
+    padding: 0px;
+}
+.nav > li{
+    padding-top: 10px;
+}
+
+.nav > li:last-child{
+    padding-top: 10px;
+}
+
+.mok{
+    height: 110px;
+    width:100%;
+    background-color: #2f999e;
+}
+.mbk{
+    height: 100%;
+    padding-left: 10%
+}
+
+.hfull{
+    height: 100%;
+}
+.wfull{
+    width: 100%;
 }

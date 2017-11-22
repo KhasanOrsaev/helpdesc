@@ -15,11 +15,6 @@ class m160921_120713_create_tasks_table extends Migration
         $this->createTable('tasks', [
             'id' => $this->primaryKey(),
             'name' => 'varchar(100) not null',
-            'document' => 'varchar(100)',
-            'code' => 'text',
-            'header' => 'text',
-            'footer' => 'text',
-            'orientation' =>'enum("L","P") default "P"',
             'department' =>'enum("nacpp","csm","iki") default "nacpp"'
         ], 'CHARACTER SET utf8');
     }

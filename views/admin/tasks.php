@@ -1,16 +1,10 @@
 <?
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use dosamigos\tinymce\TinyMce;
 ?>
 <style>
     table td,table th  {
         text-align: center;
-    }
-    #code {
-        margin: 1%;
-        padding: 1%;
-        background: rgba(189, 168, 168, 0.25);
     }
 </style>
 <h1>Предопределенные задачи</h1>
@@ -56,13 +50,8 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'update']); ?>
                 <?=$form->field($model,'name')->textInput()?>
-                <?=$form->field($model,'orientation')->radioList(['P'=>'Вертикальная', 'L'=>'Горизонтальная'])?>
-                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"ЦСМ",'iki'=>'ИКИ'])?>
+                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"МК",'iki'=>'ИКИ'])?>
                 <?=$form->field($model,'id')->hiddenInput()->label('')?>
-                <?=$form->field($model,'code')->textarea(['rows'=>6, 'id'=>'codeText']) ?>
-                <?=$form->field($model,'header')->textarea(['rows'=>5, 'id'=>'headerText']) ?>
-                <?=$form->field($model,'footer')->textarea(['rows'=>5, 'id'=>'footerText']) ?>
-                <div id="code"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -82,12 +71,7 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'create']); ?>
                 <?=$form->field($model,'name')->textInput()?>
-                <?=$form->field($model,'orientation')->radioList(['P'=>'Вертикальная', 'L'=>'Горизонтальная'],['id'=>'orient'])?>
-                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"ЦСМ",'iki'=>'ИКИ'], ['id'=>'dep'])?>
-                <?=$form->field($model,'code')->textarea(['rows'=>10, 'id'=>'codeText']) ?>
-                <?=$form->field($model,'header')->textarea(['rows'=>5, 'id'=>'headerText']) ?>
-                <?=$form->field($model,'footer')->textarea(['rows'=>5, 'id'=>'footerText']) ?>
-                <div id="code"></div>
+                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"МК",'iki'=>'ИКИ'], ['id'=>'dep'])?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -112,30 +96,9 @@ use dosamigos\tinymce\TinyMce;
                     modal.find('form').attr('action', 'update');
                     $('#edit #task-name').val(data.name);
                     modal.find('#task-id').val(id);
-                    modal.find('#codeText').val(data.code);
-                    modal.find('#footerText').val(data.footer);
-                    modal.find('#headerText').val(data.header);
-                    modal.find('#orient').val(data.orientation);
                     modal.find('#dep').val(data.department);
-                    modal.find('textarea').blur(function(){
-                        modal.find('#code').empty();
-                        modal.find('#code').append($(this).val());
-                    });
-                    modal.find('#code').empty();
-                    modal.find('#code').append(data.header+data.code+data.footer);
                 }
             });
-            modal.find('textarea').blur(function(){
-                modal.find('#code').empty();
-                modal.find('#code').append(modal.find('#headerText').val()+modal.find('#codeText').val()+modal.find('#footerText').val());
-            });
         });
-        $('#add').on('show.bs.modal', function(event){
-            var modal = $(this);
-            modal.find('textarea').blur(function(){
-                modal.find('#code').empty();
-                modal.find('#code').append(modal.find('#headerText').val()+modal.find('#codeText').val()+modal.find('#footerText').val());
-            });
-        })
     });
 </script>
