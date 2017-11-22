@@ -22,30 +22,36 @@ use app\models\Task;
         'enableClientValidation' => true,
         'options' => [
             'validateOnSubmit' => true,
-            'class' => 'form'
+            'class' => 'form',
+            'enctype' => 'multipart/form-data'
             ],
-        'action' => 'site/create',
+        'action' => $model->isNewRecord ? '/create' : '/update/'.$model->id,
         'method' => 'post',
     ]); ?>
-    <?
-        if(!isset(Yii::$app->user->identity->dept_id)){
-            $depts = Dept::find()->all();
-            $items = \yii\helpers\ArrayHelper::map($depts,'id','dept_name');
-            echo "<label for='dept_id'>Ваш департамент</label> <select name='dept_id' required class='form-control'><option value='' selected disabled></option>";
-            foreach($items as $key=>$val)
-                echo "<option value='$key'>$val</option>";
-            echo "</select>";
-        }
-    ?>
+    <?= $form->field($model, 'from_dept')->dropDownList($depts,['prompt'=>''])?>
+    <div class="row">
+        <div class="col-md-3">
+            <?= $form->field($model, 'computer')->textInput()?>
+        </div>
+        <div class="col-md-3">
+            <?= $form->field($model, 'phone')->textInput()?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'address')->textInput()?>
+        </div>
+        <div class="col-md-12" style="text-align:left; font-size: 1.2em;">
+            <?= $form->field($model, 'file[]')->fileInput(['multiple' => true])?>
+            <?=$model->fileName()?>
+        </div>
+    </div>
     <?= $form->field($model, 'type')->dropDownList([ 'default' => 'Общая', 'lims' => 'ЛИМС', ], ['prompt' => '', 'onchange'=>'changeType(this)', 'required'=>'required'])->label('Тип заявки') ?>
     <?= $form->field($model, 'description')->textarea(['rows' => 6])->label('Описание') ?>
-    <div id="code"></div>
+    <!--div id="code"></div-->
 </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
     <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Обновить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-    <?= Html::button('Печать',['onClick'=>'pageConvert()', 'class'=>'btn btn-warning']) ?>
     <?php ActiveForm::end(); ?>
 </div>
 <script>
@@ -53,12 +59,12 @@ use app\models\Task;
         if($(a).val()=='default'){
             var b = "<?
                $tasks = Task::find()->all();
-            $items = \yii\helpers\ArrayHelper::map($tasks,'name','name');
+            $items = \yii\helpers\ArrayHelper::map($tasks,'id','name');
             $str = "<label for='typeName'>Шаблоны</label>";
-            $str.= "<select name='typeName' class='form-control' onchange='changeTemplate(this)'>";
+            $str.= "<select name='typeName' class='form-control' id='template' <!--onchange='changeTemplate(this)->'>";
             $str.="<option value='' selected disabled>Выберите шаблон</option>";
-            foreach($items as $val){
-                $str.="<option value='$val'>$val</option>";
+            foreach($items as $key=>$val){
+                $str.="<option value='$key'>$val</option>";
             }
             $str.='</select>';
             echo $str;
@@ -70,28 +76,15 @@ use app\models\Task;
         }
     }
     function changeTemplate(a){
-        switch ($(a).val()){
-            <? foreach($tasks as $val){ ?>
-                case '<?=$val->name?>':c = ''+<?=($val->code)?"'$val->code'":'""'?>; $('#code').empty(); $('#code').append(c);
-                break;
-            <? }
-            ?>
-        }
-    }
-    function pageConvert(){
-        var text = $('#code').html();
-        var i=0;
-        regex = new RegExp('<input \([^>]*?\)id="'+ 1 + '"([^>]*?)>','g')
-        b=text.match(regex);
-        i=1;
-        while ((res = text.match(new RegExp('<input \([^>]*?\)id="'+ i + '"([^>]*?)>','g')))) {
-            text = text.replace(new RegExp('<input \([^>]*?\)id="'+ i + '"([^>]*?)>','g'),' '+$('input#'+i).val()+' ');
-            i++;
-        }
-        form  = $('#code').parent('form');
-        form.after("<form action='site/print' method='post' target='_blank'><input type='hidden' name='_csrf' value='<?=Yii::$app->request->getCsrfToken()?>' /><input type='text' name='code' value='"+text+"'></form>");
-        $("form[action='site/print']").submit();
-        //alert(a);
+        $.ajax({
+            method: "POST",
+            data: {id:$(a).val()},
+            url: "/getask",
+            dataType: "html",
+            success: function(data){
+                $('#code').empty(); $('#code').append(data);
+            }
 
+        });
     }
 </script>

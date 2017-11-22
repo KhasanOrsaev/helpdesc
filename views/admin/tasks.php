@@ -1,16 +1,10 @@
 <?
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use dosamigos\tinymce\TinyMce;
 ?>
 <style>
     table td,table th  {
         text-align: center;
-    }
-    #code {
-        margin: 1%;
-        padding: 1%;
-        background: rgba(189, 168, 168, 0.25);
     }
 </style>
 <h1>Предопределенные задачи</h1>
@@ -18,9 +12,10 @@ use dosamigos\tinymce\TinyMce;
 <table class="table table-striped">
     <tr>
         <th width="10%">id</th>
-        <th width="60%">Название</th>
-        <th width="15%"></th>
-        <th width="15%"></th>
+        <th width="40%">Название</th>
+        <th width="30%">Департамент</th>
+        <th width="10%"></th>
+        <th width="10%"></th>
     </tr>
     <?
     foreach($tasks as $val){
@@ -29,6 +24,7 @@ use dosamigos\tinymce\TinyMce;
             <? $form = ActiveForm::begin(['action'=>'update']) ?>
             <td width="10%"><?=$val->id?></td>
             <td width="60%"><?=$val->name?></td>
+            <td width="60%"><?=$val->department?></td>
             <td width="15%"><?=Html::button('Изменить',[
                     'class'=>'btn btn-primary',
                     'data-toggle' => 'modal',
@@ -54,9 +50,8 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'update']); ?>
                 <?=$form->field($model,'name')->textInput()?>
+                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"МК",'iki'=>'ИКИ'])?>
                 <?=$form->field($model,'id')->hiddenInput()->label('')?>
-                <?=$form->field($model,'code')->textarea(['rows'=>6]) ?>
-                <div id="code"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -76,8 +71,7 @@ use dosamigos\tinymce\TinyMce;
             <div class="modal-body">
                 <? $form=ActiveForm::begin(['action'=>'create']); ?>
                 <?=$form->field($model,'name')->textInput()?>
-                <?=$form->field($model,'code')->textarea(['rows'=>6]) ?>
-                <div id="code"></div>
+                <?=$form->field($model,'department')->dropDownList(['nacpp'=>"НАКФФ",'csm'=>"МК",'iki'=>'ИКИ'], ['id'=>'dep'])?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -102,22 +96,9 @@ use dosamigos\tinymce\TinyMce;
                     modal.find('form').attr('action', 'update');
                     $('#edit #task-name').val(data.name);
                     modal.find('#task-id').val(id);
-                    modal.find('textarea').val(data.code);
-                    modal.find('textarea').blur(function(){
-                        modal.find('#code').empty();
-                        modal.find('#code').append($(this).val());
-                    });
-                    modal.find('#code').empty();
-                    modal.find('#code').append(data.code);
+                    modal.find('#dep').val(data.department);
                 }
             });
         });
-        $('#add').on('show.bs.modal', function(event){
-            var modal = $(this);
-            modal.find('textarea').blur(function(){
-                modal.find('#code').empty();
-                modal.find('#code').append($(this).val());
-            });
-        })
     });
 </script>

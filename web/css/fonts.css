@@ -1,0 +1,24 @@
+@font-face {
+    font-family: "BlissPro"; /* Имя шрифта */
+    src: url("../../../fonts/BlissPro-Light.otf"); /* Путь к файлу со шрифтом */
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "BlissPro";
+    src: url("../../../fonts/BlissPro-Bold.otf");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: "BlissPro";
+    src: url("../../../fonts/BlissPro-Italic.otf");
+    font-style: italic;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "BlissPro";
+    src: url("../../../fonts/BlissPro-BoldItalic.otf");
+    font-style: italic;
+    font-weight: bold;
+}

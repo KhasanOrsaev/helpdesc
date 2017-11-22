@@ -17,11 +17,11 @@ class m160909_073345_create_users_table extends Migration
             'display_name' => 'varchar(100) not null',
             'dept_id' => 'int(11)',
             'email' => 'varchar(50)',
-            'is_admin' => 'enum("0","1") default "0"',
+            'is_admin' => 'boolean default false',
             'org' => 'enum("nacpp","iki","csm") default "nacpp"',
-            'is_chief' => 'enum("0","1") default "0"',
-            'is_it' => 'enum("0","1") default "0"',
-            'is_dept_chief' => 'enum("0","1") default "0"',
+            'is_chief' => 'boolean default false',
+            'is_it' => 'boolean default false',
+            'is_dept_chief' => 'boolean default false',
         ], 'CHARACTER SET utf8');
     }
 

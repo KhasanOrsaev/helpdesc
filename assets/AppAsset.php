@@ -19,6 +19,7 @@ class AppAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'css/fonts.css'
     ];
     public $js = [
     ];
@@ -29,4 +30,10 @@ class AppAsset extends AssetBundle
     public $jsOptions = array(
         'position' => \yii\web\View::POS_HEAD
     );
+
+    public function init()
+    {
+        parent::init();
+        $this->publishOptions['forceCopy'] = true;
+    }
 }

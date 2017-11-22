@@ -27,10 +27,8 @@ class Task extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'orientation', 'department'], 'required'],
+            [['name'], 'required'],
             [['name'], 'string', 'max' => 100],
-            [['document'], 'file'],
-            [['code','header','footer'], 'string'],
         ];
     }
 
@@ -42,9 +40,6 @@ class Task extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Название',
-            'document' => 'Путь к файлу',
-            'code' => 'Приложение',
-            'orientation' => 'Ориентация',
             'department' => 'Департамент'
         ];
     }
