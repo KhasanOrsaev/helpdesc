@@ -146,10 +146,13 @@ $this->title = 'HELPDESK';
                                 ]);
 
                                 Modal::end();
-                             } ?>
+                             }
+                            if(Yii::$app->user->identity->is_admin){
+                                ?>
                             <a href="/delete/<?=$val['id']?>">
                                 <i class="glyphicon glyphicon-trash" style="font-size: 1.5em;"></i>
                             </a>
+                            <? } ?>
                         </td>
                     </tr>
                     <? } ?>

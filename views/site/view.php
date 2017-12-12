@@ -52,8 +52,21 @@ $this->title = $model->id;
                         'method' => 'post',
                     ],
                 ]); }
-            ?>
-            <? if(Yii::$app->user->identity->is_admin==1 && $model->status=='D' && $model->status=='A'){
+
+            if($model->created_by == Yii::$app->user->id && $model->status=='W') {
+                Modal::begin([
+                    'header' => '<h2>Редактировать</h2>',
+                    'toggleButton' => ['label' => 'Редактировать', 'class' => 'btn btn-default'],
+                ]);
+                echo $this->render('/forms/createUpdateSubj', [
+                    'model' => $model,
+                    'depts' => $depts
+                ]);
+
+                Modal::end();
+            }
+
+            if(Yii::$app->user->identity->is_admin==1 && $model->status=='D' && $model->status=='A'){
                 Modal::begin([
                     'header' => '<h3>Исполнитель</h3>',
                     'toggleButton' => [

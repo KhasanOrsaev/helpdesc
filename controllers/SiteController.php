@@ -158,7 +158,7 @@ class SiteController extends Controller
         $model->text = isset(Yii::$app->request->post()['typeName'])?Yii::$app->request->post()['typeName']:'';
         $request = Yii::$app->request->post();
         if ($model->load($request)){
-            $user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
+            //$user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
             if (Yii::$app->request->isPost) {
                 $model->file = UploadedFile::getInstances($model, 'file');
                 if(!empty($model->file) && $model->file !== 0) {
@@ -231,7 +231,7 @@ class SiteController extends Controller
         $model = $this->findModel($id);
         $history = new History();
         $log = new Log();
-        //$model->status = 'C';
+        $model->status = 'D';
         $model->text = isset(Yii::$app->request->post()['typeName'])?Yii::$app->request->post()['typeName']:'';
         $request = Yii::$app->request->post();
         if ($model->load($request)){
@@ -245,17 +245,18 @@ class SiteController extends Controller
                         $log->time = date('Y-m-d H:i');
                         $log->save();
                     }
+                } else {
+                    $model->file = '';
                 }
-                //var_dump($model);die;
             }
             if($model->save()) {
                 Yii::$app->mailer->compose()
                     ->setFrom(['portal@nacpp.ru' => 'HELPDESK'])
-                    ->setTo($user->email)
+                    ->setTo($this->getEmails($model))
                     ->setCc(array_merge($this->emails, [Yii::$app->user->identity->email]))
                     //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
-                    ->setSubject('Создана заявка №' . $model->id)
-                    ->setHtmlBody('Создана заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
+                    ->setSubject('Отредактирована заявка №' . $model->id)
+                    ->setHtmlBody('Отредактирована заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
                     ->send();/*switch ($model->type){
                 case 'default':
                     $mail = Yii::$app->mailer->compose()
@@ -333,7 +334,8 @@ class SiteController extends Controller
         $it_users = User::find()->where(['is_it'=>1])->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
-            'users' => ArrayHelper::map($it_users,'id','display_name')
+            'users' => ArrayHelper::map($it_users,'id','display_name'),
+            'depts' => ArrayHelper::map(Dept::find()->all(),'id', 'dept_name')
         ]);
     }
     /**
@@ -383,7 +385,6 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc($this->getEmails($model))
                 ->setSubject('Заявка взята на выполнение №'.$model->id)
                 ->setHtmlBody('Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
                 ->send();
@@ -439,7 +440,6 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc($this->getEmails($model))
                 ->setSubject('Заявка выполняется №'.$model->id)
                 ->setHtmlBody($text)
                 ->send();
@@ -465,7 +465,6 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc($this->getEmails())
                 ->setSubject('Заявка выполняется №'.$model->id)
                 ->setHtmlBody($text)
                 ->send();
