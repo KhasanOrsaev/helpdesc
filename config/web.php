@@ -31,8 +31,8 @@ $config = [
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
                 'host' => '192.168.0.202',
-                'username' => 'Portal',
-                'password' => 'QWEasd234',
+                //'username' => 'Portal',
+                //'password' => 'QWEasd234',
                 'port' => '25',
                 'encryption' => null,
             ],
@@ -86,11 +86,13 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
+        'allowedIPs' => ['127.0.0.1', '192.168.0.143', '::1'],
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
+        'allowedIPs' => ['127.0.0.1', '192.168.0.143', '::1'],
     ];
 }
 

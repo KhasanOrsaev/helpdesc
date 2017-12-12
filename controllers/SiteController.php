@@ -25,7 +25,7 @@ use yii\web\UploadedFile;
 
 class SiteController extends Controller
 {
-    public $emails = ['OrsaevK.A@nacpp.ru'];
+    public $emails = ['IT@nacpp.ru'];
     public function behaviors()
     {
         return [
@@ -152,11 +152,12 @@ class SiteController extends Controller
         $history = new History();
         $log = new Log();
         $model->created_by = Yii::$app->user->id;
-        $model->created_at = date('Y-m-d H:i:s');
-        $model->status = 'C';
+        //$model->created_at = date('Y-m-d H:i:s');
+        //$model->status = 'C';     //на подтверждении
+        $model->status = 'D';
         $model->text = isset(Yii::$app->request->post()['typeName'])?Yii::$app->request->post()['typeName']:'';
         $request = Yii::$app->request->post();
-        if ($model->load($request) && $model->save()){
+        if ($model->load($request)){
             $user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
             if (Yii::$app->request->isPost) {
                 $model->file = UploadedFile::getInstances($model, 'file');
@@ -167,17 +168,19 @@ class SiteController extends Controller
                         $log->time = date('Y-m-d H:i');
                         $log->save();
                     }
+                } else {
+                    $model->file = '';
                 }
             }
-            Yii::$app->mailer->compose()
-                ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
-                //->setTo($user->email)
-                ->setCc(['OrsaevK.A@nacpp.ru', Yii::$app->user->identity->email])
-                //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
-                ->setSubject('Заявка на подтверждение №'.$model->id)
-                ->setHtmlBody('Заявка на подтверждение №'.$model->id.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
-                ->send();
-            /*switch ($model->type){
+            if($model->save()) {
+                Yii::$app->mailer->compose()
+                    ->setFrom(['portal@nacpp.ru' => 'HELPDESK'])
+                    ->setTo($this->getEmails($model))
+                    ->setCc(array_merge($this->emails, [Yii::$app->user->identity->email]))
+                    //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
+                    ->setSubject('Создана заявка №' . $model->id)
+                    ->setHtmlBody('Создана заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
+                    ->send();/*switch ($model->type){
                 case 'default':
                     $mail = Yii::$app->mailer->compose()
                         ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
@@ -206,12 +209,13 @@ class SiteController extends Controller
                     break;
                 default:
             }*/;
-            $history->subject_id = $model->id;
-            $history->theme = 'Создана заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $history->description = 'Создана заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $log->text = 'Создана заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $history->save();
-            $log->save();
+                $history->subject_id = $model->id;
+                $history->theme = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history->description = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $log->text = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history->save();
+                $log->save();
+            }
             $this->redirect('/');
         } else {
             $log->text = 'Ошибка при создании '.$model->getErrors();
@@ -243,17 +247,16 @@ class SiteController extends Controller
                     }
                 }
                 //var_dump($model);die;
-                $model->save();
             }
-            Yii::$app->mailer->compose()
-                ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
-                //->setTo($user->email)
-                ->setCc(['OrsaevK.A@nacpp.ru', Yii::$app->user->identity->email])
-                //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
-                ->setSubject('Заявка на подтверждение №'.$model->id)
-                ->setHtmlBody('Заявка на подтверждение №'.$model->id.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
-                ->send();
-            /*switch ($model->type){
+            if($model->save()) {
+                Yii::$app->mailer->compose()
+                    ->setFrom(['portal@nacpp.ru' => 'HELPDESK'])
+                    ->setTo($user->email)
+                    ->setCc(array_merge($this->emails, [Yii::$app->user->identity->email]))
+                    //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
+                    ->setSubject('Создана заявка №' . $model->id)
+                    ->setHtmlBody('Создана заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
+                    ->send();/*switch ($model->type){
                 case 'default':
                     $mail = Yii::$app->mailer->compose()
                         ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
@@ -282,12 +285,13 @@ class SiteController extends Controller
                     break;
                 default:
             }*/;
-            $history->subject_id = $model->id;
-            $history->theme = 'Отредактирована заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $history->description = 'Отредактирована заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $log->text = 'Отредактирована заявка пользователем '.Yii::$app->user->identity->user_name.' номер - '.$model->id;
-            $history->save();
-            $log->save();
+                $history->subject_id = $model->id;
+                $history->theme = 'Отредактирована заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history->description = 'Отредактирована заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $log->text = 'Отредактирована заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history->save();
+                $log->save();
+            }
             $this->redirect('/');
         } else {
             $log->text = 'Ошибка при редактировании '.$model->getErrors();
@@ -379,7 +383,7 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc(array_merge($this->emails,[Yii::$app->user->identity->email]))
+                ->setCc($this->getEmails($model))
                 ->setSubject('Заявка взята на выполнение №'.$model->id)
                 ->setHtmlBody('Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
                 ->send();
@@ -435,7 +439,7 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc($this->emails)
+                ->setCc($this->getEmails($model))
                 ->setSubject('Заявка выполняется №'.$model->id)
                 ->setHtmlBody($text)
                 ->send();
@@ -461,7 +465,7 @@ class SiteController extends Controller
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
-                ->setCc($this->emails)
+                ->setCc($this->getEmails())
                 ->setSubject('Заявка выполняется №'.$model->id)
                 ->setHtmlBody($text)
                 ->send();
@@ -497,6 +501,10 @@ class SiteController extends Controller
     public function actionModel($id){
         return $this->findModel($id);
     }
+
+    /*
+     * Вывод почты пользователей, кто начальник деп, кто создал, кто взял на выполнение
+     */
 
     protected function getEmails($model){
         $users = User::find()
