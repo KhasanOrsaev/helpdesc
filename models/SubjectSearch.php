@@ -46,7 +46,7 @@ class SubjectSearch extends Subject
      */
     public function search($params)
     {
-        $query = Subject::find()->innerJoinWith(['statuses', 'createdBy a'])->joinWith(['takenBy']);
+        $query = Subject::find()->innerJoinWith(['statuses', 'createdBy a'])->joinWith(['takenBy b', 'tasks']);
 
 /*        // add conditions that should always apply here
 
@@ -72,10 +72,8 @@ class SubjectSearch extends Subject
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'finished_at' => $this->finished_at,
-            'taken_at' => $this->taken_at,
+            'cast(created_at as date)' => $this->created_at,
+            'cast(finished_at as date)' => $this->finished_at,
             'taken_by' => $this->taken_by,
             'created_by' => $this->created_by,
             'level' => $this->level,
@@ -87,7 +85,7 @@ class SubjectSearch extends Subject
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like','a.display_name',$this->getAttribute('createdBy.name')])
             ->andFilterWhere(['=','a.org',Yii::$app->user->identity->org])
-            ->andFilterWhere(['like','display_name',$this->getAttribute('takenBy.name')])
+            ->andFilterWhere(['like','b.display_name',$this->getAttribute('takenBy.name')])
             ->andFilterWhere(['=','symbol',$this->getAttribute('statuses')])
             ->orderBy(['subjects.id'=>SORT_DESC]);
 

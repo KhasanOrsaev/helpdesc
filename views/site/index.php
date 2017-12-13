@@ -56,7 +56,10 @@ $this->title = 'HELPDESK';
                 ])?>
                 <?=$form->field($searchModel,'createdBy.name')->textInput()->label('Автор записи')?>
                 <?=$form->field($searchModel,'takenBy.name')->textInput()->label('Исполнитель')?>
-                <?=$form->field($searchModel,'type')->textInput()?>
+                <?=$form->field($searchModel,'type')->dropDownList([
+                    'lims' => 'ЛИМС',
+                    'default' => 'Общие'
+                ])?>
                 <?=$form->field($searchModel,'description')->textInput()?>
                 <?=$form->field($searchModel,'created_at')->widget(\yii\jui\DatePicker::className(),[
                     'language' => 'ru',
@@ -118,7 +121,11 @@ $this->title = 'HELPDESK';
                                 }
                             ?>
                         </td>
-                        <td class="text-center"><?="<a href='/view/".$val['id']."'>".$val->description."</a>" ?></td>
+                        <td class="text-center"><?
+                            echo "<a href='/view/".$val['id']."'>";
+                            echo $val->tasks ? $val->tasks->name.' - ' : '';
+                            echo $val->description."</a>" ?>
+                        </td>
                         <td class="text-center"><?=date('H:i d.m.Y', strtotime($val->created_at)) ?></td>
                         <td class="text-center"><?=$val->finished_at!='0000-00-00 00:00:00' ? date('H:i d.m.Y', strtotime($val->finished_at)) : ''?></td>
                         <td class="text-center"><?=$val->createdBy->display_name ?></td>

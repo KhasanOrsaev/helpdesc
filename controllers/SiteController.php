@@ -105,10 +105,10 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $model = new Subject();
-        $searchModel = new SubjectSearch();
-        $depts = ArrayHelper::map(Dept::find()->all(),'id', 'dept_name');
-        $dataProvider = $searchModel->search(Yii::$app->request->post());
+        $model          = new Subject();
+        $searchModel    = new SubjectSearch();
+        $depts          = ArrayHelper::map(Dept::find()->all(),'id', 'dept_name');
+        $dataProvider   = $searchModel->search(Yii::$app->request->post());
         if(Yii::$app->request->post('excel','')==1){
             $file = \Yii::createObject([
                 'class' => 'codemix\excelexport\ExcelFile',
@@ -132,31 +132,31 @@ class SiteController extends Controller
             $file->send('text.xls');
 
         }
-        $pages = new Pagination(['totalCount' => $dataProvider->count()]);
+        $pages  = new Pagination(['totalCount' => $dataProvider->count()]);
         $models = $dataProvider->offset($pages->offset)
             ->limit($pages->limit)
             ->all();
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'model' => $models,
-            'mod' => $model,
-            'pages' => $pages,
-            'depts' => $depts,
-            'status' => ArrayHelper::map(Statuses::find()->all(),'symbol','name')
+            'searchModel'   => $searchModel,
+            'model'         => $models,
+            'mod'           => $model,
+            'pages'         => $pages,
+            'depts'         => $depts,
+            'status'        => ArrayHelper::map(Statuses::find()->all(),'symbol','name')
         ]);
     }
 
     public function actionCreate()
     {
-        $model = new Subject();
-        $history = new History();
-        $log = new Log();
-        $model->created_by = Yii::$app->user->id;
+        $model              = new Subject();
+        $history            = new History();
+        $log                = new Log();
+        $request            = Yii::$app->request->post();
         //$model->created_at = date('Y-m-d H:i:s');
         //$model->status = 'C';     //на подтверждении
-        $model->status = 'D';
-        $model->text = isset(Yii::$app->request->post()['typeName'])?Yii::$app->request->post()['typeName']:'';
-        $request = Yii::$app->request->post();
+        $model->created_by  = Yii::$app->user->id;
+        $model->status      = 'D';
+        $model->text        = isset($request->typeName)?$request->typeName:'';
         if ($model->load($request)){
             //$user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
             if (Yii::$app->request->isPost) {
@@ -209,31 +209,31 @@ class SiteController extends Controller
                     break;
                 default:
             }*/;
-                $history->subject_id = $model->id;
-                $history->theme = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
-                $history->description = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
-                $log->text = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
-                $history->save();
-                $log->save();
+                $history    ->subject_id = $model->id;
+                $history    ->theme = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history    ->description = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $log        ->text = 'Создана заявка пользователем ' . Yii::$app->user->identity->user_name . ' номер - ' . $model->id;
+                $history    ->save();
+                $log        ->save();
             }
             $this->redirect('/');
         } else {
-            $log->text = 'Ошибка при создании '.$model->getErrors();
-            $log->time = date('Y-m-d H:i');
-            $log->save();
-            $this->redirect('/');
+            $log    ->text = 'Ошибка при создании '.$model->getErrors();
+            $log    ->time = date('Y-m-d H:i');
+            $log    ->save();
+            $this   ->redirect('/');
         }
 
     }
 
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-        $history = new History();
-        $log = new Log();
-        $model->status = 'D';
-        $model->text = isset(Yii::$app->request->post()['typeName'])?Yii::$app->request->post()['typeName']:'';
-        $request = Yii::$app->request->post();
+        $model          = $this->findModel($id);
+        $request        = Yii::$app->request->post();
+        $history        = new History();
+        $log            = new Log();
+        $model->status  = 'D';
+        $model->text    = isset($request->typeName)?$request->typeName:'';
         if ($model->load($request)){
             $user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
             if (Yii::$app->request->isPost) {

@@ -88,12 +88,19 @@ class Subject extends \yii\db\ActiveRecord
     public function getStatuses() {
         return $this->hasOne(Statuses::className(),['symbol' => 'status']);
     }
+
+    public function getTasks() {
+        return $this->hasOne(Task::className(),['id' => 'text']);
+    }
+
     public function getDept() {
         return $this->hasOne(Dept::className(),['id' => 'from_dept']);
     }
+
     public function getHistory() {
         return $this->hasMany(History::className(),['subject_id' => 'id']);
     }
+    
     public function upload()
     {
         $name = '';
