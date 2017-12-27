@@ -92,13 +92,13 @@ $this->title = 'HELPDESK';
                     <li class="active"> <a   data-target="#new"     mode="/D" role="tab" onclick = 'getTable(this, 1)'>Новые</a></li>
                     <li>
                         <a   data-target="#doing"   mode="/A" role="tab" onclick = 'getTable(this, 1)'>
-                            В работе <?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? Yii::$app->user->identity->display_name : ''?>
+                            В работе <?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? ' ('.Yii::$app->user->identity->display_name.')' : ''?>
                         </a>
                     </li>
                     <li>                <a   data-target="#waiting" mode="/W" role="tab" onclick = 'getTable(this, 1)'>На уточнении</a></li>
                     <li>
                         <a   data-target="#ready"   mode="/T" role="tab" onclick = 'getTable(this, 1)'>
-                            Выполнено<?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? Yii::$app->user->identity->display_name : ''?>
+                            Выполнено<?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? ' ('.Yii::$app->user->identity->display_name.')' : ''?>
                         </a>
                     </li>
                     <li>                <a   data-target="#all"     mode="" role="tab" onclick = 'getTable(this, 1)'>Все</a></li>

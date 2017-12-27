@@ -168,8 +168,8 @@ class SiteController extends Controller
                 }
             }
             if($model->save()) {
-                $text = 'Создана заявка №' . $model->id .'<br>';
-                $text.= '<i>'.$model->tasks ? $model->tasks->name.' - ' : '';
+                $text = 'Создана заявка №' . $model->id .'<br><i>';
+                $text.= $model->tasks ? $model->tasks->name.' - ' : '';
                 $text.= $model->description.'</i><br>';
                 $text.= "<a href='192.168.0.2:84/site/view?id=".$model->id."'>Открыть</a>";
                 Yii::$app->mailer->compose()
