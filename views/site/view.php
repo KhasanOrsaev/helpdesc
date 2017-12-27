@@ -25,7 +25,8 @@ $this->title = $model->id;
                     'data-target' => '#take'
                 ]);
                 echo Html::a('Отправить на уточнение', ['explain','id' => $model->id], [
-                    'class' => 'btn btn-default'
+                    'class' => 'btn btn-default',
+                    'style' => 'margin:0 5px'
                 ]);
             }
             if(Yii::$app->user->identity->is_dept_chief==1 && Yii::$app->user->identity->dept_id==$model->from_dept && $model->status=='C'){
@@ -166,7 +167,7 @@ $form = ActiveForm::begin([
     'action' => '/take/'.$model->id
 ]) ?>
 <label for="time"> Требуемое время на выполнение</label>
-<input type="time" name="time" class="form-control" style="margin: 2% 0" required>
+<input type="time" name="time" class="form-control" style="margin: 2% 0" value="00:10" required>
 <?
 echo Html::submitButton('Ok', ['class' => 'btn btn-primary']);
 ActiveForm::end();
@@ -183,7 +184,7 @@ $form = ActiveForm::begin([
 
 ?>
 <label for="time"> Требуемое время на выполнение</label>
-<input type="time" name="time" class="form-control" style="margin: 2% 0" required>
+<input type="time" name="time" class="form-control" style="margin: 2% 0" required value="08:00">
 <?
 echo $form->field($model,'taken_by')->dropDownList($users);
 echo $form->field($model,'comments')->textInput(['required'=>true]);

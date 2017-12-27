@@ -44,7 +44,7 @@ class SubjectSearch extends Subject
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $id=null)
     {
         $query = Subject::find()->innerJoinWith(['statuses', 'createdBy a'])->joinWith(['takenBy b', 'tasks']);
 
@@ -68,6 +68,11 @@ class SubjectSearch extends Subject
             } else {
                 $query->andFilterWhere(['=','created_by',Yii::$app->user->id]);
             }
+        }elseif(Yii::$app->user->identity->is_chief && !Yii::$app->user->identity->is_it){
+            $query->andFilterWhere(['=','from_dept',Yii::$app->user->identity->dept_id]);
+        }
+        if(in_array($id, ['A,T'])){
+            $this->taken_by = Yii::$app->user->id;
         }
         // grid filtering conditions
         $query->andFilterWhere([
@@ -78,6 +83,17 @@ class SubjectSearch extends Subject
             'created_by' => $this->created_by,
             'level' => $this->level,
         ]);
+        // если ит не админ и не начальник, то видит только те "в работе"|"выполнено", которые сам выполняет
+        if(in_array($id,['A','T']) && Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief){
+            $query->andFilterWhere([
+                'taken_by' => Yii::$app->user->id,
+            ]);
+        } else {
+            $query->andFilterWhere([
+                'taken_by' => $this->taken_by,
+            ]);
+        }
+
         $query->andFilterWhere(['like', 'type', $this->type])
             ->andFilterWhere(['like', 'text', $this->text])
             ->andFilterWhere(['!=', 'status', 'R'])
@@ -86,7 +102,7 @@ class SubjectSearch extends Subject
             ->andFilterWhere(['like','a.display_name',$this->getAttribute('createdBy.name')])
             ->andFilterWhere(['=','a.org',Yii::$app->user->identity->org])
             ->andFilterWhere(['like','b.display_name',$this->getAttribute('takenBy.name')])
-            ->andFilterWhere(['=','symbol',$this->getAttribute('statuses')])
+            ->andFilterWhere(['=','symbol',$id])
             ->orderBy(['subjects.id'=>SORT_DESC]);
 
         return $query;

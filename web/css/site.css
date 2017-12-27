@@ -174,3 +174,24 @@ a.desc:after {
 .wfull{
     width: 100%;
 }
+
+.pagination li{
+    list-style: none;
+    display: inline-block;
+}
+
+.btn-lnk {
+    width: 50px;
+    margin-left: 5px;
+    background: #36b7bd33;
+    box-shadow: 0 0 15px 1px white inset;
+    border: white;
+}
+
+.btn-lnk:hover, .btn-lnk:active {
+    box-shadow: 0 0 15px 1px grey inset;
+}
+
+.btn-lnk.active {
+    box-shadow: 0 0 15px 1px grey inset;
+}

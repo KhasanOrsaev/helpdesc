@@ -53,7 +53,7 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 '/' => 'site/index',
-                '/<action:[\w-]+>/<id:\d+>' => 'site/<action>',
+                '/<action:[\w-]+>/<id:[\d\w]+>' => 'site/<action>',
                 '/<action:[\w-]+>' => 'site/<action>',
                 '/<controller:\w+>/<action:[\w-]+>/<id:\d+>' => '<controller>/<action>'
             ],

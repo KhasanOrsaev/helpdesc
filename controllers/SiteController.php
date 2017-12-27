@@ -35,7 +35,7 @@ class SiteController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
-                        'actions' => ['print','logout','index','create','update','getask', 'confirm', 'model']
+                        'actions' => ['print','logout','index','create','update','getask', 'confirm', 'model', 'subject-type']
                     ],
                     [
                         'allow' => true,
@@ -106,10 +106,11 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $model          = new Subject();
-        $searchModel    = new SubjectSearch();
+        //var_dump(http_build_query(Yii::$app->request->get()));die;
         $depts          = ArrayHelper::map(Dept::find()->all(),'id', 'dept_name');
-        $dataProvider   = $searchModel->search(Yii::$app->request->post());
-        if(Yii::$app->request->post('excel','')==1){
+        $searchModel    = new SubjectSearch();
+        $dataProvider   = $searchModel->search(Yii::$app->request->get());
+        if(Yii::$app->request->get('excel','')==1){
             $file = \Yii::createObject([
                 'class' => 'codemix\excelexport\ExcelFile',
                 'sheets' => [
@@ -132,15 +133,9 @@ class SiteController extends Controller
             $file->send('text.xls');
 
         }
-        $pages  = new Pagination(['totalCount' => $dataProvider->count()]);
-        $models = $dataProvider->offset($pages->offset)
-            ->limit($pages->limit)
-            ->all();
         return $this->render('index', [
             'searchModel'   => $searchModel,
-            'model'         => $models,
             'mod'           => $model,
-            'pages'         => $pages,
             'depts'         => $depts,
             'status'        => ArrayHelper::map(Statuses::find()->all(),'symbol','name')
         ]);
@@ -156,7 +151,7 @@ class SiteController extends Controller
         //$model->status = 'C';     //на подтверждении
         $model->created_by  = Yii::$app->user->id;
         $model->status      = 'D';
-        $model->text        = isset($request->typeName)?$request->typeName:'';
+        $model->text        = isset($request['typeName'])?$request['typeName']:'';
         if ($model->load($request)){
             //$user = User::find()->where(['dept_id'=>$model->from_dept, 'is_chief'=>1])->one(); // Начальник департамента
             if (Yii::$app->request->isPost) {
@@ -173,13 +168,17 @@ class SiteController extends Controller
                 }
             }
             if($model->save()) {
+                $text = 'Создана заявка №' . $model->id .'<br>';
+                $text.= '<i>'.$model->tasks ? $model->tasks->name.' - ' : '';
+                $text.= $model->description.'</i><br>';
+                $text.= "<a href='192.168.0.2:84/site/view?id=".$model->id."'>Открыть</a>";
                 Yii::$app->mailer->compose()
                     ->setFrom(['portal@nacpp.ru' => 'HELPDESK'])
                     ->setTo($this->getEmails($model))
                     ->setCc(array_merge($this->emails, [Yii::$app->user->identity->email]))
                     //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                     ->setSubject('Создана заявка №' . $model->id)
-                    ->setHtmlBody('Создана заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
+                    ->setHtmlBody($text)
                     ->send();/*switch ($model->type){
                 case 'default':
                     $mail = Yii::$app->mailer->compose()
@@ -188,7 +187,7 @@ class SiteController extends Controller
                         //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                         ->setSubject('Новая заявка №'.$model->id)
                         ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>');
+                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>');
                     if(Yii::$app->request->post('code',''!='')){
                         $pdf = new mPDF();
                         $pdf->WriteHTML(Yii::$app->request->post('code'));
@@ -204,7 +203,7 @@ class SiteController extends Controller
                         //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                         ->setSubject('Новая заявка №'.$model->id)
                         ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>')
                         ->send();
                     break;
                 default:
@@ -256,7 +255,7 @@ class SiteController extends Controller
                     ->setCc(array_merge($this->emails, [Yii::$app->user->identity->email]))
                     //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                     ->setSubject('Отредактирована заявка №' . $model->id)
-                    ->setHtmlBody('Отредактирована заявка №' . $model->id . ' <a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Ссылка</b></a>')
+                    ->setHtmlBody('Отредактирована заявка №' . $model->id . ' <br><a href="192.168.0.2:84/site/view?id=' . $model->id . '"> <b>Открыть</b></a>')
                     ->send();/*switch ($model->type){
                 case 'default':
                     $mail = Yii::$app->mailer->compose()
@@ -265,7 +264,7 @@ class SiteController extends Controller
                         //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                         ->setSubject('Новая заявка №'.$model->id)
                         ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>');
+                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>');
                     if(Yii::$app->request->post('code',''!='')){
                         $pdf = new mPDF();
                         $pdf->WriteHTML(Yii::$app->request->post('code'));
@@ -281,7 +280,7 @@ class SiteController extends Controller
                         //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                         ->setSubject('Новая заявка №'.$model->id)
                         ->setTextBody($model->text.' || '.$model->description)
-                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                        ->setHtmlBody('<a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>')
                         ->send();
                     break;
                 default:
@@ -338,6 +337,28 @@ class SiteController extends Controller
             'depts' => ArrayHelper::map(Dept::find()->all(),'id', 'dept_name')
         ]);
     }
+
+    public function actionSubjectType($id=null) {
+        $searchModel    = new SubjectSearch();
+        $dataProvider   = $searchModel->search(Yii::$app->request->get(), $id);
+        $pages  = new Pagination(['totalCount' => $dataProvider->count()]);
+        $models = $dataProvider->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+        $page_indexes[] = 1;
+        for($i=Yii::$app->request->get('page')-3; $i<=Yii::$app->request->get('page')+3;$i++) {
+            if($i>1 && $i<ceil($pages->totalCount/$pages->defaultPageSize))
+                $page_indexes[] = $i;
+        }
+        $page_indexes[] = ceil($pages->totalCount/$pages->defaultPageSize);
+        return $this->renderAjax('tasks', [
+            'model'         => $models,
+            'pages'         => $pages,
+            'indexes'       => $page_indexes,
+            'depts'         => ArrayHelper::map(Dept::find()->all(),'id', 'dept_name')
+        ]);
+
+    }
     /**
      * Logout action.
      *
@@ -362,7 +383,7 @@ class SiteController extends Controller
                 ->setTo($arr)
                 ->setCc(array_merge($this->emails,[Yii::$app->user->identity->email]))
                 ->setSubject('Заявка выполнена №'.$model->id)
-                ->setHtmlBody('Заявка №'.$model->id.' выполнена <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                ->setHtmlBody('Заявка №'.$model->id.' выполнена <br><a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>')
                 ->send();
             $log = new History();
             $log->theme = 'Заявка номер - ' . $id . ' выполнена ';
@@ -386,7 +407,7 @@ class SiteController extends Controller
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
                 ->setTo($arr)
                 ->setSubject('Заявка взята на выполнение №'.$model->id)
-                ->setHtmlBody('Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                ->setHtmlBody('Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.'<br> <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>')
                 ->send();
             $log = new History();
             $log->theme = 'Заявка номер - ' . $id . ' взята пользователем ' . Yii::$app->user->identity->user_name;
@@ -407,7 +428,7 @@ class SiteController extends Controller
                 ->setTo($arr)
                 ->setCc(array_merge($this->emails,[Yii::$app->user->identity->email]))
                 ->setSubject('Заявка отправлена на уточнение №'.$model->id)
-                ->setHtmlBody('Заявка №'.$model->id.' отправлена на уточнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>')
+                ->setHtmlBody('Заявка №'.$model->id.' отправлена на уточнение сотрудником IT отдела '.Yii::$app->user->identity->display_name.'<br> <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>')
                 ->send();
             $history = new History();
             $log = new Log();
@@ -432,9 +453,9 @@ class SiteController extends Controller
         if($model->load($request) && $model->save()) {
             $user = User::findOne($model->taken_by);
             if($model->getOldAttribute('taken_by')){
-                $text = 'Заявка №'.$model->id.' обновлена, выполняется сотрудником IT отдела '.$user->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>';
+                $text = 'Заявка №'.$model->id.' обновлена, выполняется сотрудником IT отдела '.$user->display_name.'<br> <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>';
             } else {
-                $text = 'Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.$user->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>';
+                $text = 'Заявка №'.$model->id.' взята на выполнение сотрудником IT отдела '.$user->display_name.'<br> <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>';
             }
             $arr = $this->getEmails($model);
             Yii::$app->mailer->compose()
@@ -460,7 +481,7 @@ class SiteController extends Controller
         $model->time_finish = date('Y-m-d H:i', strtotime("+$time[0] hours + $time[1] minutes"));
         if($model->load($request) && $model->save()) {
             $user = User::findOne($model->taken_by);
-            $text = 'Заявка №'.$model->id.' обновлена, выполняется сотрудником IT отдела '.$user->display_name.' <a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Ссылка</b></a>';
+            $text = 'Заявка №'.$model->id.' обновлена, выполняется сотрудником IT отдела '.$user->display_name.' <br><a href="192.168.0.2:84/site/view?id='.$model->id.'"> <b>Открыть</b></a>';
             $arr = $this->getEmails($model);
             Yii::$app->mailer->compose()
                 ->setFrom(['portal@nacpp.ru'=>'HELPDESK'])
@@ -497,10 +518,6 @@ class SiteController extends Controller
         }
     }
 
-    public function actionModel($id){
-        return $this->findModel($id);
-    }
-
     /*
      * Вывод почты пользователей, кто начальник деп, кто создал, кто взял на выполнение
      */
@@ -533,7 +550,7 @@ class SiteController extends Controller
                 ->setCc(['OrsaevK.A@nacpp.ru', Yii::$app->user->identity->email])
                 //->setCc(['supportlims@nacpp.ru','saenkok@nacpp.ru'])
                 ->setSubject('Заявка подтверждена №'.$subject->id)
-                ->setHtmlBody('Заявка подтверждена №'.$subject->id.' <a href="192.168.0.2:84/site/view?id='.$subject->id.'"> <b>Ссылка</b></a>')
+                ->setHtmlBody('Заявка подтверждена №'.$subject->id.' <br><a href="192.168.0.2:84/site/view?id='.$subject->id.'"> <b>Открыть</b></a>')
                 ->send();
             return $this->redirect('/view/'.$subject->id);
         } else {

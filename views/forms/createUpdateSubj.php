@@ -28,7 +28,7 @@ use app\models\Task;
         'action' => $model->isNewRecord ? '/create' : '/update/'.$model->id,
         'method' => 'post',
     ]); ?>
-    <?= $form->field($model, 'from_dept')->dropDownList($depts,['prompt'=>''])?>
+    <?= $form->field($model, 'from_dept')->dropDownList($depts,['prompt'=>'', 'required' => 'required'])?>
     <div class="row">
         <div class="col-md-3">
             <?= $form->field($model, 'computer')->textInput()?>

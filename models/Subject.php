@@ -43,7 +43,7 @@ class Subject extends \yii\db\ActiveRecord
             [['status'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::className(), 'targetAttribute' => ['status' => 'symbol']],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
             [['taken_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['taken_by' => 'id']],
-            [['file'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf, doc, xml, txt, xlsx, png, jpg', 'maxFiles' => 4],
+            [['file'], 'file', 'skipOnEmpty' => 1, 'extensions' => 'pdf, doc, xml, txt, xlsx, png, jpg', 'maxFiles' => 4],
         ];
     }
 

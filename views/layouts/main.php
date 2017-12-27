@@ -27,7 +27,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => '<a href="/"><img src="/images/logo_nacpp.png" class="img-responsive"/></a>',
+        'brandLabel' => '<img src="/images/logo_nacpp.png" class="img-responsive"/>',
         'renderInnerContainer' => false,
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
@@ -65,7 +65,7 @@ AppAsset::register($this);
     ?>
     <div class="mok">
         <div class="hfull">
-            <img src="/images/pretence.png" class="mbk">
+            <a href="/"><img src="/images/pretence.png" class="mbk"></a>
         </div>
     </div>
     <div class="container wfull">

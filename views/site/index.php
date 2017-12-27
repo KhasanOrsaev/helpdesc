@@ -23,10 +23,10 @@ $this->title = 'HELPDESK';
     <hr>
     <div class="body-content">
         <div class="row">
-            <div class="col-lg-10">
-                <button class="btn btn-success pull-left" data-toggle="modal" data-target="#new">Новая заявка</button>
-                <?
+            <div class="col-lg-12">
+                <button class="btn btn-success pull-left" data-toggle="modal" data-target="#newTask">Новая заявка</button>
 
+                <?
                 Modal::begin([
                     'header' => '<h3>Фильтр</h3>',
                     'toggleButton' => [
@@ -57,8 +57,9 @@ $this->title = 'HELPDESK';
                 <?=$form->field($searchModel,'createdBy.name')->textInput()->label('Автор записи')?>
                 <?=$form->field($searchModel,'takenBy.name')->textInput()->label('Исполнитель')?>
                 <?=$form->field($searchModel,'type')->dropDownList([
-                    'lims' => 'ЛИМС',
-                    'default' => 'Общие'
+                    ''          => '',
+                    'lims'      => 'ЛИМС',
+                    'default'   => 'Общие'
                 ])?>
                 <?=$form->field($searchModel,'description')->textInput()?>
                 <?=$form->field($searchModel,'created_at')->widget(\yii\jui\DatePicker::className(),[
@@ -77,106 +78,46 @@ $this->title = 'HELPDESK';
                         'class' => 'form-control'
                     ]
                 ]) ?>
-                <?=$form->field($searchModel,'statuses')->dropDownList($status, ['prompt' => ''])->label('Статус')?>
+                <?//=$form->field($searchModel,'statuses')->dropDownList($status, ['prompt' => ''])->label('Статус')?>
                 <?=Html::Button('Поиск',['class'=>'btn btn-default', 'onclick'=>'search(this)'])?>
                 <?=Html::Button('Excel',['class'=>'btn btn-warning', 'onclick'=>'excel(this)'])?>
+                <?=Html::Button('Закрыть',['class'=>'btn btn-danger', 'data-dismiss'=>'modal'])?>
                 <? ActiveForm::end();
 
                 Modal::end();
-
                 ?>
-            </div>
-            <div class="col-lg-12" style="text-align: center">
-                <?
-                echo \yii\widgets\LinkPager::widget([
-                    'pagination' => $pages,
-                ]);
-                ?>
-            </div>
-            <div class="col-lg-12" style="margin: 2% 0;">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <td class="text-center"><b>#</b></td>
-                            <td class="text-center"><b>Тип Заявки</b></td>
-                            <td class="text-center"><b>Описание</b></td>
-                            <td class="text-center"><b>Создана</b></td>
-                            <td class="text-center"><b>Выполнено</b></td>
-                            <td class="text-center"><b>Автор</b></td>
-                            <td class="text-center"><b>Исполнитель</b></td>
-                            <td class="text-center"><b>Статус</b></td>
-                            <td class="text-center"><b></td>
-                        </tr>
-                    </thead>
-                    <? foreach($model as $val){?>
-                    <tr>
-                        <td class="text-center"><?=$val['id'] ?></td>
-                        <td class="text-center">
-                            <?
-                                switch ($val->type){
-                                    case 'default': echo "Общие"; break;
-                                    case 'lims': echo "ЛИМС"; break;
-                                    case 'support': echo "Поддержка"; break;
-                                    default: echo "Общие";
-                                }
-                            ?>
-                        </td>
-                        <td class="text-center"><?
-                            echo "<a href='/view/".$val['id']."'>";
-                            echo $val->tasks ? $val->tasks->name.' - ' : '';
-                            echo $val->description."</a>" ?>
-                        </td>
-                        <td class="text-center"><?=date('H:i d.m.Y', strtotime($val->created_at)) ?></td>
-                        <td class="text-center"><?=$val->finished_at!='0000-00-00 00:00:00' ? date('H:i d.m.Y', strtotime($val->finished_at)) : ''?></td>
-                        <td class="text-center"><?=$val->createdBy->display_name ?></td>
-                        <td class="text-center"><?=isset($val->takenBy->user_name) ? $val->takenBy->display_name : '' ?></td>
-                        <td class="text-center"><p style="background: <?=$val->statuses->color ?>; color: white;"><?=$val->statuses->name ?></p></td>
-                        <td class="text-center">
-                            <a href="/view/<?=$val['id']?>">
-                                <i class="glyphicon glyphicon-eye-open" style="margin-right: 10%; font-size: 1.5em;"></i>
-                            </a>
-                            <? if($val->status == 'D' or $val->status == 'W'){
-                                Modal::begin([
-                                    'header' => '<h3>Редактировать</h3>',
-                                    'toggleButton' => [
-                                        'tag' => 'i',
-                                        'class' => 'glyphicon glyphicon-pencil',
-                                        'label' => '',
-                                        'style' => 'margin-right: 10%; font-size: 1.5em;'
-                                    ],
-                                    'size' => 'modal-lg',
-                                ]);
+                <hr>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active"> <a   data-target="#new"     mode="/D" role="tab" onclick = 'getTable(this, 1)'>Новые</a></li>
+                    <li>
+                        <a   data-target="#doing"   mode="/A" role="tab" onclick = 'getTable(this, 1)'>
+                            В работе <?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? Yii::$app->user->identity->display_name : ''?>
+                        </a>
+                    </li>
+                    <li>                <a   data-target="#waiting" mode="/W" role="tab" onclick = 'getTable(this, 1)'>На уточнении</a></li>
+                    <li>
+                        <a   data-target="#ready"   mode="/T" role="tab" onclick = 'getTable(this, 1)'>
+                            Выполнено<?=(Yii::$app->user->identity->is_it && !Yii::$app->user->identity->is_admin && !Yii::$app->user->identity->is_chief) ? Yii::$app->user->identity->display_name : ''?>
+                        </a>
+                    </li>
+                    <li>                <a   data-target="#all"     mode="" role="tab" onclick = 'getTable(this, 1)'>Все</a></li>
+                </ul>
 
-                                echo $this->render('/forms/createUpdateSubj', [
-                                    'model' => $val,
-                                    'depts' => $depts
-                                ]);
+                <div class="tab-content">
+                    <div class="tab-pane active" id="new"></div>
+                    <div class="tab-pane" id="doing"></div>
+                    <div class="tab-pane" id="waiting"></div>
+                    <div class="tab-pane" id="ready"></div>
+                    <div class="tab-pane" id="all"></div>
 
-                                Modal::end();
-                             }
-                            if(Yii::$app->user->identity->is_admin){
-                                ?>
-                            <a href="/delete/<?=$val['id']?>">
-                                <i class="glyphicon glyphicon-trash" style="font-size: 1.5em;"></i>
-                            </a>
-                            <? } ?>
-                        </td>
-                    </tr>
-                    <? } ?>
-                </table>
-            </div>
-            <div class="col-lg-12" style="text-align: center">
-                <?
-                echo \yii\widgets\LinkPager::widget([
-                    'pagination' => $pages,
-                ]);
-                ?>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
-<div class="modal fade" id="new" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="newTask" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -193,16 +134,49 @@ $this->title = 'HELPDESK';
     </div>
 </div>
     <script>
+        $(function(){
+            $.get('/subject-type/D' + '?' + '<?=http_build_query(Yii::$app->request->post())?>', function(data){
+                $('#new').html(data);
+            });
+        });
+
+        function getTable(e, page){
+            loadurl = '/subject-type' + $(e).attr('mode') + '?page=' + page + '&<?=http_build_query(Yii::$app->request->post())?>';
+            targ = $(e).attr('data-target');
+            $.get(loadurl, function(data) {
+                $(targ).html(data);
+            });
+            $(e).tab('show');
+        }
+
         function excel(e){
             form = $(e).parent();
             form.append('<input name="excel" type="hidden" value="1" />');
             form.attr('target','_blank');
             form.submit();
         }
+
         function search(e){
             form = $(e).parent();
             form.removeAttr('target');
             $(form).find('input[name="excel"]').remove();
             form.submit();
+        }
+
+        function next_page(){
+            button = $(".pagination .btn.active");
+            tab = $("ul.nav li.active a");
+            getTable(tab, parseInt(button.text())+1);
+        }
+
+        function previous_page(){
+            button = $(".pagination .btn.active");
+            tab = $("ul.nav li.active a");
+            getTable(tab, parseInt(button.text())-1);
+        }
+
+        function link(e){
+            tab = $("ul.nav li.active a");
+            getTable(tab, $(e).text());
         }
     </script>
