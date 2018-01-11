@@ -109,8 +109,8 @@ class SiteController extends Controller
         //var_dump(http_build_query(Yii::$app->request->get()));die;
         $depts          = ArrayHelper::map(Dept::find()->all(),'id', 'dept_name');
         $searchModel    = new SubjectSearch();
-        $dataProvider   = $searchModel->search(Yii::$app->request->get());
-        if(Yii::$app->request->get('excel','')==1){
+        $dataProvider   = $searchModel->search(Yii::$app->request->post());
+        if(Yii::$app->request->post('excel','')==1){
             $file = \Yii::createObject([
                 'class' => 'codemix\excelexport\ExcelFile',
                 'sheets' => [
